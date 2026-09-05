@@ -8,19 +8,28 @@ ENV APP_NAME="115pc" \
     ENABLE_CJK_FONT=1 \
     DISPLAY_WIDTH="1920" \
     DISPLAY_HEIGHT="1080" \
-    APT_SOURCE_HOST="mirrors.ustc.edu.cn" \
     LANG=zh_CN.UTF-8 \
     LC_ALL=zh_CN.UTF-8 \
     DEBIAN_FRONTEND=noninteractive
 
-# 替换 apt 源
-RUN sed -i "s/archive.ubuntu.com/${APT_SOURCE_HOST}/g" /etc/apt/sources.list && \
-    sed -i "s/security.ubuntu.com/${APT_SOURCE_HOST}/g" /etc/apt/sources.list
+# 直接覆盖 sources.list 为 USTC 镜像（适用于 Ubuntu 22.04）
+RUN echo "deb https://mirrors.ustc.edu.cn/ubuntu/ jammy main restricted universe multiverse" > /etc/apt/sources.list && \
+    echo "deb https://mirrors.ustc.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb https://mirrors.ustc.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb https://mirrors.ustc.edu.cn/ubuntu/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list
 
-# 安装基础依赖
+# 先安装基础工具和证书，确保网络正常
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
     curl \
     locales \
+    && rm -rf /var/lib/apt/lists/*
+
+# 生成中文 locale
+RUN locale-gen zh_CN.UTF-8
+
+# 安装图形界面依赖（单独拆分，便于定位）
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libgtk-3-0 \
     libx11-xcb1 \
     libxcb-icccm4 \
@@ -32,9 +41,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxcb-xfixes0 \
     libxcb-shape0 \
     && rm -rf /var/lib/apt/lists/*
-
-# 生成中文 locale
-RUN locale-gen zh_CN.UTF-8
 
 # 下载并安装 115 客户端，自动修复依赖
 RUN curl -fL -o /tmp/115Life_${APP_VERSION}.deb \
