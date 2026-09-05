@@ -1,4 +1,4 @@
-FROM jlesage/baseimage-gui:ubuntu-22.04
+FROM jlesage/baseimage-gui:ubuntu-22.04-v4
 LABEL maintainer="Hezekiah Ho, aka funcman <hyq1986@gmail.com>"
 
 ENV APP_NAME="115pc" \
