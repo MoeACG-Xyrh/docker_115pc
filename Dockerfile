@@ -1,4 +1,4 @@
-FROM jlesage/baseimage-gui:ubuntu-18.04
+FROM jlesage/baseimage-gui:ubuntu-22.04
 LABEL maintainer="Hezekiah Ho, aka funcman <hyq1986@gmail.com>"
 
 ENV APP_NAME="115pc" \
@@ -9,13 +9,15 @@ ENV APP_NAME="115pc" \
     DISPLAY_WIDTH="1920" \
     DISPLAY_HEIGHT="1080" \
     APT_SOURCE_HOST="mirrors.ustc.edu.cn" \
+    LANG=zh_CN.UTF-8 \
+    LC_ALL=zh_CN.UTF-8 \
     DEBIAN_FRONTEND=noninteractive
 
-# 替换 apt 源（包括 security 源）
+# 替换 apt 源
 RUN sed -i "s/archive.ubuntu.com/${APT_SOURCE_HOST}/g" /etc/apt/sources.list && \
     sed -i "s/security.ubuntu.com/${APT_SOURCE_HOST}/g" /etc/apt/sources.list
 
-# 一次性安装所需依赖和工具
+# 安装基础依赖
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     locales \
@@ -39,7 +41,8 @@ RUN curl -fL -o /tmp/115Life_${APP_VERSION}.deb \
     https://down.115.com/client/115pc/lin/115Life_${APP_VERSION}.deb && \
     dpkg -i /tmp/115Life_${APP_VERSION}.deb || true && \
     apt-get update && apt-get install -f -y && \
-    rm -rf /var/lib/apt/lists/* /tmp/115Life_${APP_VERSION}.deb
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/115Life_${APP_VERSION}.deb /var/cache/apt/archives/*
 
 COPY startapp.sh /startapp.sh
 RUN chmod +x /startapp.sh
