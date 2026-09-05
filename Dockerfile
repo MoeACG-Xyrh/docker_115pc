@@ -12,13 +12,13 @@ ENV APP_NAME="115pc" \
     LC_ALL=zh_CN.UTF-8 \
     DEBIAN_FRONTEND=noninteractive
 
-# 直接覆盖 sources.list 为 USTC 镜像（适用于 Ubuntu 22.04）
-RUN echo "deb https://mirrors.ustc.edu.cn/ubuntu/ jammy main restricted universe multiverse" > /etc/apt/sources.list && \
-    echo "deb https://mirrors.ustc.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
-    echo "deb https://mirrors.ustc.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
-    echo "deb https://mirrors.ustc.edu.cn/ubuntu/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list
+# 使用 HTTP 源，避免证书缺失
+RUN echo "deb http://mirrors.ustc.edu.cn/ubuntu/ jammy main restricted universe multiverse" > /etc/apt/sources.list && \
+    echo "deb http://mirrors.ustc.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb http://mirrors.ustc.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb http://mirrors.ustc.edu.cn/ubuntu/ jammy-security main restricted universe multiverse" >> /etc/apt/sources.list
 
-# 先安装基础工具和证书，确保网络正常
+# 现在更新并安装基础工具（包含 ca-certificates）
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
@@ -28,7 +28,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # 生成中文 locale
 RUN locale-gen zh_CN.UTF-8
 
-# 安装图形界面依赖（单独拆分，便于定位）
+# 安装图形依赖（此时已有证书，也可以继续使用 HTTP，但无所谓）
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgtk-3-0 \
     libx11-xcb1 \
@@ -42,7 +42,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxcb-shape0 \
     && rm -rf /var/lib/apt/lists/*
 
-# 下载并安装 115 客户端，自动修复依赖
+# 下载安装 115 客户端
 RUN curl -fL -o /tmp/115Life_${APP_VERSION}.deb \
     https://down.115.com/client/115pc/lin/115Life_${APP_VERSION}.deb && \
     dpkg -i /tmp/115Life_${APP_VERSION}.deb || true && \
