@@ -2,7 +2,7 @@ FROM jlesage/baseimage-gui:ubuntu-18.04
 LABEL maintainer="Hezekiah Ho, aka funcman <hyq1986@gmail.com>"
 
 ENV APP_NAME        "115pc"
-ENV APP_VERSION     "2.0.10.2"
+ENV APP_VERSION     "37.2.3"
 ENV USER_ID         0
 ENV GROUP_ID        0
 ENV ENABLE_CJK_FONT 1
@@ -14,7 +14,7 @@ RUN sed -i "s/archive.ubuntu.com/${APT_SOURCE_HOST}/g" /etc/apt/sources.list
 RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install -y curl locales
 RUN export LANG=zh_CN.UTF-8 && locale-gen zh_CN.UTF-8
-RUN curl https://down.115.com/client/115pc/lin/115pc_${APP_VERSION}.deb -o /tmp/115pc_${APP_VERSION}.deb
-RUN dpkg -i /tmp/115pc_${APP_VERSION}.deb
+RUN curl https://down.115.com/client/115pc/lin/115Life_${APP_VERSION}.deb -o /tmp/115Life_${APP_VERSION}.deb
+RUN dpkg -i /tmp/115Life_${APP_VERSION}.deb
 
 COPY startapp.sh /startapp.sh
